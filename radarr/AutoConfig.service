@@ -49,7 +49,26 @@ log "Using naming profiles: MovieFile='$namingProfileMovieFile', MovieFolder='$n
 trashStandardMovieFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProfileMovieFile" '.file[$profile]')
 trashMovieFolderFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProfileMovieFolder" '.folder[$profile]')
 
+# Validate extracted naming patterns
+if [ "$trashStandardMovieFormat" == "null" ] || [ -z "$trashStandardMovieFormat" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileMovieFile' for movie files. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .file"
+	log "Skipping naming configuration to prevent applying invalid patterns."
+	trashStandardMovieFormat=""
+fi
+
+if [ "$trashMovieFolderFormat" == "null" ] || [ -z "$trashMovieFolderFormat" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileMovieFolder' for movie folders. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .folder"
+	log "Skipping naming configuration to prevent applying invalid patterns."
+	trashMovieFolderFormat=""
+fi
+
+# Only proceed with naming configuration if we have valid patterns
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
+	if [ -z "$trashStandardMovieFormat" ] || [ -z "$trashMovieFolderFormat" ]; then
+		log "Skipping Radarr naming configuration due to invalid naming patterns."
+	else
 	log "Updating Radarr Moving Naming..."
 	updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
 	    \"renameMovies\":true,
@@ -62,7 +81,8 @@ if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	    \"id\":1
 	    }")
 
-	log "Complete"
+		log "Complete"
+	fi
 fi
 
 if [ "$configureMediaManagement" == "true" ] || [ -z "$configureMediaManagement" ]; then
