@@ -89,7 +89,7 @@ loadNamingConfiguration () {
   # Load base naming configuration
   if [ -f /config/extended/naming.json ]; then
     log "Loading base $appName Naming from /config/extended/naming.json..."
-    baseNamingJson=$(< /config/extended/naming.json)
+    baseNamingJson=$(cat /config/extended/naming.json)
   else
     log "Loading base $appName Naming from Trash Guides..."
     baseNamingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/$appNameLower/naming/$appNameLower-naming.json")
@@ -104,7 +104,8 @@ loadNamingConfiguration () {
   # Check for user overrides and merge if present
   if [ -f /config/extended/naming-overrides.json ]; then
     log "Found naming overrides at /config/extended/naming-overrides.json, merging with base..."
-    if namingJson=$(echo "$baseNamingJson" | jq -e -s --argfile overrides /config/extended/naming-overrides.json '.[0] * $overrides'); then
+    if namingJson=$(echo "$baseNamingJson" | \
+                    jq -e -s --argfile overrides /config/extended/naming-overrides.json '.[0] * $overrides'); then
       log "Naming configuration merged successfully"
     else
       log "Failed to merge naming overrides; invalid JSON or jq error detected. Falling back to base naming configuration."
