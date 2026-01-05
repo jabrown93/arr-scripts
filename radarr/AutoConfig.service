@@ -50,23 +50,22 @@ trashStandardMovieFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProf
 trashMovieFolderFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProfileMovieFolder" '.folder[$profile]')
 
 # Validate extracted naming patterns
+validationFailed=false
 if [ "$trashStandardMovieFormat" == "null" ] || [ -z "$trashStandardMovieFormat" ]; then
 	log "ERROR: Invalid naming profile '$namingProfileMovieFile' for movie files. Profile not found in naming configuration."
 	log "Available profiles can be found in /config/extended/naming.json under .file"
-	log "Skipping naming configuration to prevent applying invalid patterns."
-	trashStandardMovieFormat=""
+	validationFailed=true
 fi
 
 if [ "$trashMovieFolderFormat" == "null" ] || [ -z "$trashMovieFolderFormat" ]; then
 	log "ERROR: Invalid naming profile '$namingProfileMovieFolder' for movie folders. Profile not found in naming configuration."
 	log "Available profiles can be found in /config/extended/naming.json under .folder"
-	log "Skipping naming configuration to prevent applying invalid patterns."
-	trashMovieFolderFormat=""
+	validationFailed=true
 fi
 
 # Only proceed with naming configuration if we have valid patterns
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
-	if [ -z "$trashStandardMovieFormat" ] || [ -z "$trashMovieFolderFormat" ]; then
+	if [ "$validationFailed" == "true" ]; then
 		log "Skipping Radarr naming configuration due to invalid naming patterns."
 	else
 	log "Updating Radarr Moving Naming..."
