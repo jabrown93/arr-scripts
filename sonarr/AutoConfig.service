@@ -39,7 +39,7 @@ fi
 
 # Set default naming profile selections if not configured
 namingProfileStandardEpisode="${namingProfileStandardEpisode:-default:4}"
-namingProfileDailyEpisode="${namingProfileDailyEpisode:-defaul:4t}"
+namingProfileDailyEpisode="${namingProfileDailyEpisode:-default:4}"
 namingProfileAnimeEpisode="${namingProfileAnimeEpisode:-default:4}"
 namingProfileSeries="${namingProfileSeries:-default}"
 namingProfileSeason="${namingProfileSeason:-default}"
