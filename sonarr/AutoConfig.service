@@ -90,25 +90,25 @@ if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	if [ "$validationFailed" == "true" ]; then
 		log "Skipping Sonarr naming configuration due to invalid naming patterns."
 	else
-	log "Updating Sonarr File Naming..."
-	updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
-		\"renameEpisodes\":true,
-		\"replaceIllegalCharacters\":true,
-		\"multiEpisodeStyle\":5,
-		\"standardEpisodeFormat\":\"$standardNaming\",
-		\"dailyEpisodeFormat\":\"$dailyNaming\",
-		\"animeEpisodeFormat\":\"$animeNaming\",
-		\"seriesFolderFormat\":\"$seriesNaming\",
-		\"seasonFolderFormat\":\"$seasonNaming\",
-		\"specialsFolderFormat\":\"$seasonNaming\",
-		\"includeSeriesTitle\":false,
-		\"includeEpisodeTitle\":false,
-		\"includeQuality\":false,
-		\"replaceSpaces\":true,
-		\"separator\":\" - \",
-		\"numberStyle\":\"S{season:00}E{episode:00}\",
-		\"id\":1
-		}")
+		log "Updating Sonarr File Naming..."
+		updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
+			\"renameEpisodes\":true,
+			\"replaceIllegalCharacters\":true,
+			\"multiEpisodeStyle\":5,
+			\"standardEpisodeFormat\":\"$standardNaming\",
+			\"dailyEpisodeFormat\":\"$dailyNaming\",
+			\"animeEpisodeFormat\":\"$animeNaming\",
+			\"seriesFolderFormat\":\"$seriesNaming\",
+			\"seasonFolderFormat\":\"$seasonNaming\",
+			\"specialsFolderFormat\":\"$seasonNaming\",
+			\"includeSeriesTitle\":false,
+			\"includeEpisodeTitle\":false,
+			\"includeQuality\":false,
+			\"replaceSpaces\":true,
+			\"separator\":\" - \",
+			\"numberStyle\":\"S{season:00}E{episode:00}\",
+			\"id\":1
+			}")
 		log "Complete"
 	fi
 fi

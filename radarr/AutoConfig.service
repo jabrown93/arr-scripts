@@ -68,17 +68,17 @@ if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	if [ "$validationFailed" == "true" ]; then
 		log "Skipping Radarr naming configuration due to invalid naming patterns."
 	else
-	log "Updating Radarr Moving Naming..."
-	updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
-	    \"renameMovies\":true,
-	    \"replaceIllegalCharacters\":true,
-	    \"colonReplacementFormat\":\"delete\",
-	    \"standardMovieFormat\":\"$trashStandardMovieFormat\",
-	    \"movieFolderFormat\":\"$trashMovieFolderFormat\",
-	    \"includeQuality\":false,
-	    \"replaceSpaces\":false,
-	    \"id\":1
-	    }")
+		log "Updating Radarr Moving Naming..."
+		updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
+		    \"renameMovies\":true,
+		    \"replaceIllegalCharacters\":true,
+		    \"colonReplacementFormat\":\"delete\",
+		    \"standardMovieFormat\":\"$trashStandardMovieFormat\",
+		    \"movieFolderFormat\":\"$trashMovieFolderFormat\",
+		    \"includeQuality\":false,
+		    \"replaceSpaces\":false,
+		    \"id\":1
+		    }")
 
 		log "Complete"
 	fi
