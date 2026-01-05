@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-scriptVersion="1.8"
+scriptVersion="2.0"
 scriptName="AutoConfig"
 
 #### Import Settings
@@ -18,19 +18,49 @@ fi
 getArrAppInfo
 verifyApiAccess
 
+# Load base naming configuration
 if [ -f /config/extended/naming.json ]; then
-	log "Using custom Sonarr Naming (/config/extended/naming.json)..."
-	namingJson=$(cat /config/extended/naming.json)
+	log "Loading base Sonarr Naming from /config/extended/naming.json..."
+	baseNamingJson=$(cat /config/extended/naming.json)
 else
-	log "Getting Trash Guide Recommended Naming..."
-	namingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/sonarr/naming/sonarr-naming.json")
+	log "Loading base Sonarr Naming from Trash Guides..."
+	baseNamingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/sonarr/naming/sonarr-naming.json")
 fi
 
-standardNaming=$(echo "$namingJson" | jq -r '.episodes.standard."default:4"')
-dailyNaming=$(echo "$namingJson" | jq -r '.episodes.daily."default:4"')
-animeNaming=$(echo "$namingJson" | jq -r '.episodes.anime."default:4"')
-seriesNaming=$(echo "$namingJson" | jq -r '.series.default')
-seasonNaming=$(echo "$namingJson" | jq -r '.season.default')
+# Check for user overrides and merge if present
+if [ -f /config/extended/naming-overrides.json ]; then
+	log "Found naming overrides at /config/extended/naming-overrides.json, merging with base..."
+	namingJson=$(echo "$baseNamingJson" | jq -s --argfile overrides /config/extended/naming-overrides.json '.[0] * $overrides')
+	log "Naming configuration merged successfully"
+else
+	log "No naming overrides found, using base configuration"
+	namingJson="$baseNamingJson"
+fi
+
+# Set default naming profile selections if not configured
+if [ -z "$namingProfileStandardEpisode" ]; then
+	namingProfileStandardEpisode="default:4"
+fi
+if [ -z "$namingProfileDailyEpisode" ]; then
+	namingProfileDailyEpisode="default:4"
+fi
+if [ -z "$namingProfileAnimeEpisode" ]; then
+	namingProfileAnimeEpisode="default:4"
+fi
+if [ -z "$namingProfileSeries" ]; then
+	namingProfileSeries="default"
+fi
+if [ -z "$namingProfileSeason" ]; then
+	namingProfileSeason="default"
+fi
+
+# Extract naming patterns using configured profiles
+log "Using naming profiles: Standard='$namingProfileStandardEpisode', Daily='$namingProfileDailyEpisode', Anime='$namingProfileAnimeEpisode', Series='$namingProfileSeries', Season='$namingProfileSeason'"
+standardNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileStandardEpisode" '.episodes.standard[$profile]')
+dailyNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileDailyEpisode" '.episodes.daily[$profile]')
+animeNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileAnimeEpisode" '.episodes.anime[$profile]')
+seriesNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeries" '.series[$profile]')
+seasonNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeason" '.season[$profile]')
 
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	log "Updating Sonarr File Naming..."

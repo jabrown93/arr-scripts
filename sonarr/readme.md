@@ -17,6 +17,59 @@ Version Tag: develop (v4 is required for some of the features)
 1. Optional: Customize the configuration by modifying the following file `/config/extended.conf`
 1. Restart the container
 
+## Advanced Configuration
+
+### Custom Naming Patterns
+
+The AutoConfig script supports flexible naming pattern customization through multiple methods:
+
+#### Method 1: Profile Selection (Recommended)
+
+Configure which naming profile variant to use in `/config/extended.conf`:
+
+```bash
+# Available profiles for episodes: "default:3", "default:4", "original"
+namingProfileStandardEpisode="default:4"  # Standard episode naming
+namingProfileDailyEpisode="default:4"     # Daily episode naming
+namingProfileAnimeEpisode="default:4"     # Anime episode naming
+
+# Available profiles for folders: "default", "plex", "emby", "jellyfin"
+namingProfileSeries="default"   # Series folder naming
+namingProfileSeason="default"   # Season folder naming
+```
+
+This allows you to easily switch between pre-defined naming patterns (e.g., use "plex" for Plex-compatible series naming).
+
+#### Method 2: Override File
+
+Create a file at `/config/extended/naming-overrides.json` to override specific naming patterns:
+
+Example override file (`/config/extended/naming-overrides.json`):
+```json
+{
+    "episodes": {
+        "standard": {
+            "default:4": "{Series TitleYear} - S{season:00}E{episode:00} - {Episode Title} [{Custom Formats}]"
+        }
+    },
+    "series": {
+        "default": "{Series Title} ({Series Year})"
+    }
+}
+```
+
+See [naming-overrides.example.json](naming-overrides.example.json) for a complete example.
+
+#### How It Works
+
+The script processes naming configuration in this order:
+1. Load base naming configuration (from Trash Guides or `/config/extended/naming.json` if present)
+2. Merge your overrides from `/config/extended/naming-overrides.json` (if present)
+3. Select the appropriate profile variant using the configured profile names
+4. Apply the final naming patterns to Sonarr
+
+**Both methods can be used together**: Use profile selection to choose between built-in variants (e.g., "plex", "emby"), and use override files to customize specific patterns further.
+
 ## Updating
 
 Updating is a bit more cumbersome. To update, do the following:

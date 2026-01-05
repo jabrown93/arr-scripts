@@ -1,0 +1,8 @@
+{
+    "file": {
+        "default": "{Movie CleanTitle} ({Release Year}) [{Custom Formats}][{Quality Full}]{-Release Group}"
+    },
+    "folder": {
+        "default": "{Movie Title} ({Release Year})"
+    }
+}

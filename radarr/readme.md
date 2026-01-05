@@ -16,6 +16,54 @@ Container: <https://docs.linuxserver.io/images/docker-radarr>
 1. Optional: Customize the configuration by modifying the following file `/config/extended.conf`
 1. Restart the container
 
+## Advanced Configuration
+
+### Custom Naming Patterns
+
+The AutoConfig script supports flexible naming pattern customization through multiple methods:
+
+#### Method 1: Profile Selection (Recommended)
+
+Configure which naming profile variant to use in `/config/extended.conf`:
+
+```bash
+# Available profiles for file: "default", "emby", "jellyfin", "anime", "anime-emby", "anime-jellyfin", "original"
+namingProfileMovieFile="default"    # Movie file naming
+
+# Available profiles for folder: "default", "plex", "emby", "jellyfin"
+namingProfileMovieFolder="default"  # Movie folder naming
+```
+
+This allows you to easily switch between pre-defined naming patterns (e.g., use "plex" for Plex-compatible folder naming with IMDB ID).
+
+#### Method 2: Override File
+
+Create a file at `/config/extended/naming-overrides.json` to override specific naming patterns:
+
+Example override file (`/config/extended/naming-overrides.json`):
+```json
+{
+    "file": {
+        "default": "{Movie CleanTitle} ({Release Year}) [{Custom Formats}][{Quality Full}]{-Release Group}"
+    },
+    "folder": {
+        "default": "{Movie Title} ({Release Year})"
+    }
+}
+```
+
+See [naming-overrides.example.json](naming-overrides.example.json) for a complete example.
+
+#### How It Works
+
+The script processes naming configuration in this order:
+1. Load base naming configuration (from Trash Guides or `/config/extended/naming.json` if present)
+2. Merge your overrides from `/config/extended/naming-overrides.json` (if present)
+3. Select the appropriate profile variant using the configured profile names
+4. Apply the final naming patterns to Radarr
+
+**Both methods can be used together**: Use profile selection to choose between built-in variants (e.g., "plex", "emby", "jellyfin"), and use override files to customize specific patterns further.
+
 ## Updating
 
 Updating is a bit more cumbersome. To update, do the following:
