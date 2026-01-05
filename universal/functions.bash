@@ -80,7 +80,7 @@ loadNamingConfiguration () {
   #   Returns 0 on success, 1 on failure
   
   local appName="$1"
-  local appNameLower=$(echo "$appName" | tr '[:upper:]' '[:lower:]')
+  local appNameLower="${appName,,}"
   local baseNamingJson
   
   # Initialize global variable
@@ -89,7 +89,7 @@ loadNamingConfiguration () {
   # Load base naming configuration
   if [ -f /config/extended/naming.json ]; then
     log "Loading base $appName Naming from /config/extended/naming.json..."
-    baseNamingJson=$(cat /config/extended/naming.json)
+    baseNamingJson=$(< /config/extended/naming.json)
   else
     log "Loading base $appName Naming from Trash Guides..."
     baseNamingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/$appNameLower/naming/$appNameLower-naming.json")
