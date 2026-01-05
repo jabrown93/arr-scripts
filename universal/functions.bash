@@ -77,9 +77,14 @@ loadNamingConfiguration () {
   #   $1 - Application name (e.g., "Radarr" or "Sonarr")
   # Returns:
   #   Sets global variable 'namingJson' with the merged configuration
+  #   Returns 0 on success, 1 on failure
   
   local appName="$1"
   local appNameLower=$(echo "$appName" | tr '[:upper:]' '[:lower:]')
+  local baseNamingJson
+  
+  # Initialize global variable
+  namingJson=""
   
   # Load base naming configuration
   if [ -f /config/extended/naming.json ]; then
@@ -88,6 +93,12 @@ loadNamingConfiguration () {
   else
     log "Loading base $appName Naming from Trash Guides..."
     baseNamingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/$appNameLower/naming/$appNameLower-naming.json")
+  fi
+  
+  # Verify base configuration was loaded
+  if [ -z "$baseNamingJson" ]; then
+    log "ERROR: Failed to load base naming configuration"
+    return 1
   fi
   
   # Check for user overrides and merge if present
@@ -103,6 +114,8 @@ loadNamingConfiguration () {
     log "No naming overrides found, using base configuration"
     namingJson="$baseNamingJson"
   fi
+  
+  return 0
 }
 
 logfileSetup

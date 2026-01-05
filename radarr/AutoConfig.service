@@ -19,7 +19,10 @@ getArrAppInfo
 verifyApiAccess
 
 # Load and merge naming configuration
-loadNamingConfiguration "Radarr"
+if ! loadNamingConfiguration "Radarr"; then
+	log "ERROR: Failed to load naming configuration, sleeping (infinity)"
+	sleep infinity
+fi
 
 namingProfileMovieFile="${namingProfileMovieFile:-default}"
 namingProfileMovieFolder="${namingProfileMovieFolder:-default}"
