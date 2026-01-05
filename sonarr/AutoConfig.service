@@ -18,24 +18,8 @@ fi
 getArrAppInfo
 verifyApiAccess
 
-# Load base naming configuration
-if [ -f /config/extended/naming.json ]; then
-	log "Loading base Sonarr Naming from /config/extended/naming.json..."
-	baseNamingJson=$(cat /config/extended/naming.json)
-else
-	log "Loading base Sonarr Naming from Trash Guides..."
-	baseNamingJson=$(curl -s "https://raw.githubusercontent.com/TRaSH-/Guides/master/docs/json/sonarr/naming/sonarr-naming.json")
-fi
-
-# Check for user overrides and merge if present
-if [ -f /config/extended/naming-overrides.json ]; then
-	log "Found naming overrides at /config/extended/naming-overrides.json, merging with base..."
-	namingJson=$(echo "$baseNamingJson" | jq -s --argfile overrides /config/extended/naming-overrides.json '.[0] * $overrides')
-	log "Naming configuration merged successfully"
-else
-	log "No naming overrides found, using base configuration"
-	namingJson="$baseNamingJson"
-fi
+# Load and merge naming configuration
+loadNamingConfiguration "Sonarr"
 
 # Set default naming profile selections if not configured
 namingProfileStandardEpisode="${namingProfileStandardEpisode:-default:4}"
