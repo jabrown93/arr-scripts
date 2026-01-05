@@ -39,7 +39,7 @@ fi
 
 # Set default naming profile selections if not configured
 namingProfileStandardEpisode="${namingProfileStandardEpisode:-default:4}"
-namingProfileDailyEpisode="${namingProfileDailyEpisode:-defaul:4t}"
+namingProfileDailyEpisode="${namingProfileDailyEpisode:-default:4}"
 namingProfileAnimeEpisode="${namingProfileAnimeEpisode:-default:4}"
 namingProfileSeries="${namingProfileSeries:-default}"
 namingProfileSeason="${namingProfileSeason:-default}"
@@ -53,27 +53,64 @@ animeNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileAnimeEpiso
 seriesNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeries" '.series[$profile]')
 seasonNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeason" '.season[$profile]')
 
+# Validate extracted naming patterns
+validationFailed=false
+if [ "$standardNaming" == "null" ] || [ -z "$standardNaming" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileStandardEpisode' for standard episodes. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .episodes.standard"
+	validationFailed=true
+fi
+
+if [ "$dailyNaming" == "null" ] || [ -z "$dailyNaming" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileDailyEpisode' for daily episodes. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .episodes.daily"
+	validationFailed=true
+fi
+
+if [ "$animeNaming" == "null" ] || [ -z "$animeNaming" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileAnimeEpisode' for anime episodes. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .episodes.anime"
+	validationFailed=true
+fi
+
+if [ "$seriesNaming" == "null" ] || [ -z "$seriesNaming" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileSeries' for series folders. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .series"
+	validationFailed=true
+fi
+
+if [ "$seasonNaming" == "null" ] || [ -z "$seasonNaming" ]; then
+	log "ERROR: Invalid naming profile '$namingProfileSeason' for season folders. Profile not found in naming configuration."
+	log "Available profiles can be found in /config/extended/naming.json under .season"
+	validationFailed=true
+fi
+
+# Only proceed with naming configuration if we have valid patterns
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
-	log "Updating Sonarr File Naming..."
-	updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
-		\"renameEpisodes\":true,
-		\"replaceIllegalCharacters\":true,
-		\"multiEpisodeStyle\":5,
-		\"standardEpisodeFormat\":\"$standardNaming\",
-		\"dailyEpisodeFormat\":\"$dailyNaming\",
-		\"animeEpisodeFormat\":\"$animeNaming\",
-		\"seriesFolderFormat\":\"$seriesNaming\",
-		\"seasonFolderFormat\":\"$seasonNaming\",
-		\"specialsFolderFormat\":\"$seasonNaming\",
-		\"includeSeriesTitle\":false,
-		\"includeEpisodeTitle\":false,
-		\"includeQuality\":false,
-		\"replaceSpaces\":true,
-		\"separator\":\" - \",
-		\"numberStyle\":\"S{season:00}E{episode:00}\",
-		\"id\":1
-		}")
-	log "Complete"
+	if [ "$validationFailed" == "true" ]; then
+		log "Skipping Sonarr naming configuration due to invalid naming patterns."
+	else
+		log "Updating Sonarr File Naming..."
+		updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{
+			\"renameEpisodes\":true,
+			\"replaceIllegalCharacters\":true,
+			\"multiEpisodeStyle\":5,
+			\"standardEpisodeFormat\":\"$standardNaming\",
+			\"dailyEpisodeFormat\":\"$dailyNaming\",
+			\"animeEpisodeFormat\":\"$animeNaming\",
+			\"seriesFolderFormat\":\"$seriesNaming\",
+			\"seasonFolderFormat\":\"$seasonNaming\",
+			\"specialsFolderFormat\":\"$seasonNaming\",
+			\"includeSeriesTitle\":false,
+			\"includeEpisodeTitle\":false,
+			\"includeQuality\":false,
+			\"replaceSpaces\":true,
+			\"separator\":\" - \",
+			\"numberStyle\":\"S{season:00}E{episode:00}\",
+			\"id\":1
+			}")
+		log "Complete"
+	fi
 fi
 
 
