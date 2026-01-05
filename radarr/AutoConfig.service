@@ -49,6 +49,23 @@ log "Using naming profiles: MovieFile='$namingProfileMovieFile', MovieFolder='$n
 trashStandardMovieFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProfileMovieFile" '.file[$profile]')
 trashMovieFolderFormat=$(echo "$namingJson" | jq -r --arg profile "$namingProfileMovieFolder" '.folder[$profile]')
 
+# Validate extracted naming patterns
+namingValidationFailed=false
+if [ "$trashStandardMovieFormat" == "null" ] || [ -z "$trashStandardMovieFormat" ]; then
+	log "ERROR: Invalid naming profile for movieFile: '$namingProfileMovieFile' not found in naming configuration"
+	namingValidationFailed=true
+fi
+if [ "$trashMovieFolderFormat" == "null" ] || [ -z "$trashMovieFolderFormat" ]; then
+	log "ERROR: Invalid naming profile for movieFolder: '$namingProfileMovieFolder' not found in naming configuration"
+	namingValidationFailed=true
+fi
+
+if [ "$namingValidationFailed" == "true" ]; then
+	log "ERROR: Naming pattern validation failed. Skipping naming configuration to prevent invalid settings."
+	log "Please check your extended.conf naming profile settings or naming-overrides.json file."
+	configureNaming="false"
+fi
+
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	log "Updating Radarr Moving Naming..."
 	updateArr=$(curl -s "$arrUrl/api/v3/config/naming" -X PUT -H "Content-Type: application/json" -H "X-Api-Key: $arrApiKey" --data-raw "{

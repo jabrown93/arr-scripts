@@ -39,7 +39,7 @@ fi
 
 # Set default naming profile selections if not configured
 namingProfileStandardEpisode="${namingProfileStandardEpisode:-default:4}"
-namingProfileDailyEpisode="${namingProfileDailyEpisode:-defaul:4t}"
+namingProfileDailyEpisode="${namingProfileDailyEpisode:-default:4}"
 namingProfileAnimeEpisode="${namingProfileAnimeEpisode:-default:4}"
 namingProfileSeries="${namingProfileSeries:-default}"
 namingProfileSeason="${namingProfileSeason:-default}"
@@ -52,6 +52,35 @@ dailyNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileDailyEpiso
 animeNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileAnimeEpisode" '.episodes.anime[$profile]')
 seriesNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeries" '.series[$profile]')
 seasonNaming=$(echo "$namingJson" | jq -r --arg profile "$namingProfileSeason" '.season[$profile]')
+
+# Validate extracted naming patterns
+namingValidationFailed=false
+if [ "$standardNaming" == "null" ] || [ -z "$standardNaming" ]; then
+	log "ERROR: Invalid naming profile for standardEpisode: '$namingProfileStandardEpisode' not found in naming configuration"
+	namingValidationFailed=true
+fi
+if [ "$dailyNaming" == "null" ] || [ -z "$dailyNaming" ]; then
+	log "ERROR: Invalid naming profile for dailyEpisode: '$namingProfileDailyEpisode' not found in naming configuration"
+	namingValidationFailed=true
+fi
+if [ "$animeNaming" == "null" ] || [ -z "$animeNaming" ]; then
+	log "ERROR: Invalid naming profile for animeEpisode: '$namingProfileAnimeEpisode' not found in naming configuration"
+	namingValidationFailed=true
+fi
+if [ "$seriesNaming" == "null" ] || [ -z "$seriesNaming" ]; then
+	log "ERROR: Invalid naming profile for series: '$namingProfileSeries' not found in naming configuration"
+	namingValidationFailed=true
+fi
+if [ "$seasonNaming" == "null" ] || [ -z "$seasonNaming" ]; then
+	log "ERROR: Invalid naming profile for season: '$namingProfileSeason' not found in naming configuration"
+	namingValidationFailed=true
+fi
+
+if [ "$namingValidationFailed" == "true" ]; then
+	log "ERROR: Naming pattern validation failed. Skipping naming configuration to prevent invalid settings."
+	log "Please check your extended.conf naming profile settings or naming-overrides.json file."
+	configureNaming="false"
+fi
 
 if [ "$configureNaming" == "true" ] || [ -z "$configureNaming" ]; then
 	log "Updating Sonarr File Naming..."
