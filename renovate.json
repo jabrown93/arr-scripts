@@ -1,6 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "ignoreTests is required here, not a shortcut: this repo has no .github/workflows at all, so nothing ever runs against a renovate/** branch. GitHub's combined status API reports `pending` when a ref has zero checks, which the inherited :automergeRequireAllStatusChecks (ignoreTests: false) reads as not-green -- every automerge would wait forever. Delete this the moment any CI workflow lands.",
   "extends": [
     "local>jabrown93/.github:renovate-config"
-  ]
+  ],
+  "ignoreTests": true
 }
